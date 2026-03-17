@@ -1,0 +1,80 @@
+type http_request_result = 
+ record {
+   body: blob;
+   headers: vec http_header;
+   status: nat;
+ };
+type http_header = 
+ record {
+   name: text;
+   value: text;
+ };
+type UserRole = 
+ variant {
+   admin;
+   guest;
+   user;
+ };
+type TransformationOutput = 
+ record {
+   body: blob;
+   headers: vec http_header;
+   status: nat;
+ };
+type TransformationInput = 
+ record {
+   context: blob;
+   response: http_request_result;
+ };
+type StripeConfig = 
+ record {
+   allowedCountries: vec text;
+   secretKey: text;
+ };
+type ProductInput = 
+ record {
+   category: text;
+   description: text;
+   imageUrl: text;
+   name: text;
+   priceInCents: nat;
+   stock: nat;
+ };
+type Product = 
+ record {
+   category: text;
+   description: text;
+   id: nat;
+   imageUrl: text;
+   isActive: bool;
+   name: text;
+   priceInCents: nat;
+   stock: nat;
+ };
+type CartItem = 
+ record {
+   productId: nat;
+   quantity: nat;
+ };
+type Cart = record {items: vec CartItem;};
+service : {
+  _initializeAccessControlWithSecret: (userSecret: text) -> ();
+  addToCart: (productId: nat, quantity: nat) -> (Cart);
+  assignCallerUserRole: (user: principal, role: UserRole) -> ();
+  clearCart: () -> ();
+  createCheckoutSession: (successUrl: text, cancelUrl: text) -> (text);
+  createProduct: (input: ProductInput) -> (Product);
+  getCallerUserRole: () -> (UserRole) query;
+  getCart: () -> (Cart) query;
+  getProduct: (id: nat) -> (opt Product) query;
+  isCallerAdmin: () -> (bool) query;
+  listAllProducts: () -> (vec Product) query;
+  listCategories: () -> (vec text) query;
+  listProducts: () -> (vec Product) query;
+  removeFromCart: (productId: nat) -> (Cart);
+  setProductActive: (id: nat, isActive: bool) -> (bool);
+  setStripeConfig: (config: StripeConfig) -> ();
+  transform: (input: TransformationInput) -> (TransformationOutput) query;
+  updateCartItem: (productId: nat, quantity: nat) -> (Cart);
+  updateProduct: (id: nat, input: ProductInput) -> (opt Product);
+}
